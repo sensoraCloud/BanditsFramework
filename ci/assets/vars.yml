@@ -1,0 +1,70 @@
+---
+# Name of your project
+project_name: data-science-voucher-opt
+
+# Ownership information
+hellofresh_tribe: platform
+hellofresh_squad: data-science-platform
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Concourse
+#-----------------------------------------------------------------------------------------------------------------------
+
+concourse_host: ci.hellofresh.io
+concourse_webtokens: true
+
+#-----------------------------------------------------------------------------------------------------------------------
+# GitHub
+#-----------------------------------------------------------------------------------------------------------------------
+
+# GitHub User/Company name
+github_user: hellofresh
+
+# GitHub repository Name
+github_repository_name: data-science-voucher-opt
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Docker Hub
+#-----------------------------------------------------------------------------------------------------------------------
+
+# dockerhub repository
+dockerhub_account: hellofreshds
+dockerhub_repository: voucher_opt
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Slack
+#-----------------------------------------------------------------------------------------------------------------------
+
+slack_username: data-science-voucher-opt
+slack_channel: "#ds-automation"
+slack_logo: https://hellofresh.github.io/scm-concourse-resources/logo.png
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Docker Host
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Docker daemon socket(s) to connect to
+docker_host: concourse-docker-scm-test000.tools.hellofresh.io
+docker_port: 2376
+
+# A set of variables to export for each integration test
+# Example: `export AMQP_DSN="amqp://guest:guest@${DOCKER_HOST}:${DOCKER_COMPOSE_RABBITMQ_5672}"`
+docker_variables: ''
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Vault - Secret management
+#-----------------------------------------------------------------------------------------------------------------------
+
+secrets:
+  ansible_vpass:
+    description: 'Automation vpass used to decode encrypted vars'
+  concourse_webhook_release:
+    description: 'Concourse webhook token for github release'
+  docker_password:
+    description: 'Password for docker registry'
+  docker_username:
+    description: 'Username for docker registry'
+  github_token:
+    description: 'GitHub Access Token'
+  vault_password:
+    description: 'ansible vault password for ds'

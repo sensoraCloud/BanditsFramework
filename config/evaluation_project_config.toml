@@ -1,0 +1,12 @@
+[DEFAULT_CONFIG]
+project_name = 'happy_hour'
+model_version = [2]
+event_query_path = 'queries/event_query.txt'
+feedback_query_path = 'queries/feedback_query.txt'
+features_query_path = 'queries/features_query.txt'
+prediction_customers_query_path = 'queries/prediction_customers_query.txt'
+main_training_data_query_path = 'queries/main_training_data_query.txt'
+main_prediction_data_query_path = 'queries/main_prediction_data_query.txt'
+
+[COUNTRY_CONFIG.US]
+model_version = [1,2]

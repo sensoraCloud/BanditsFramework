@@ -1,0 +1,38 @@
+[DEFAULT_CONFIG]
+control = 0.2
+other_action = 0.0
+exploration = 0.0
+
+actions = [0.0, 20.0, 40.0]
+default_action = 0.0
+action_desc = 'percentage'
+feedback_weeks = 3
+
+reward_agg_func = "mean"
+tree_min_sample_conf = 30
+segment_num_trees = 1
+tree_max_depth = 6
+tree_conf_bound = 0.01
+number_of_bins = 10
+categorical_frequency_threshold = 0.05
+epsilon = 0.0
+action_confidence_threshold = 50
+
+
+[COUNTRY_CONFIG.AU]
+control = 0.48
+[COUNTRY_CONFIG.BE]
+control = 0.33
+[COUNTRY_CONFIG.NL]
+control = 0.17
+[COUNTRY_CONFIG.DE]
+control = 0.53
+[COUNTRY_CONFIG.CA]
+control = 0.58
+[COUNTRY_CONFIG.GB]
+control = 0.80
+[COUNTRY_CONFIG.US]
+control = 0.05
+exploration = 0.0
+other_action = 0.2
+action_desc = 'amount'

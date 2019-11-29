@@ -1,0 +1,2 @@
+class NoSplitCandidatesException(BaseException):
+    pass

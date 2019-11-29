@@ -1,0 +1,139 @@
+#-----------------------------------------------------------------------------------------------------------------------
+# Resource Types
+#-----------------------------------------------------------------------------------------------------------------------
+resource_types:
+
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+      tag: v1.4.1
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Resources
+#-----------------------------------------------------------------------------------------------------------------------
+
+resources:
+
+  - name: gh-release
+    type: git
+    webhook_token: ((concourse_webhook_release))
+    source:
+      uri: https://((github_token))@github.com/((github_user))/((github_repository_name)).git
+      tag_filter: '[0-9].[0-9]*'
+
+  - name: artifact-image
+    type: docker-image
+    source:
+      repository: ((dockerhub_account))/((dockerhub_repository))
+      username: ((dockerhub_username))
+      password: ((dockerhub_password))
+
+  - name: slack-notification
+    type: slack-notification
+    source:
+      url: ((slack_url))
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Jobs
+#-----------------------------------------------------------------------------------------------------------------------
+jobs:
+
+  ##----------------------------------------------------------------------------------------------------------------------
+  ## Release tagged flow
+  ##----------------------------------------------------------------------------------------------------------------------
+
+  - name: 'Lint'
+    build_logs_to_retain: 100
+    plan:
+      - get: source-code
+        resource: gh-release
+        trigger: True
+        version: every
+
+      - task: Run lint
+        file: source-code/ci/tasks/lint.yml
+
+    on_failure:
+      put: slack-notification
+      params:
+        channel: ((slack_channel))
+        username: ((slack_username))
+        icon_url: ((slack_logo))
+        text: >
+          :x: Lint failed!
+          Repository: <https://github.com/((github_user))/((github_repository_name))|((github_repository_name))>,
+          Build: <http://((concourse_host))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|$BUILD_NAME>)
+
+  - name: 'Test'
+    build_logs_to_retain: 100
+    plan:
+      - get: source-code
+        resource: gh-release
+        trigger: True
+        version: every
+
+      - task: Run unit tests
+        file: source-code/ci/tasks/unit-tests.yml
+        params:
+          GITHUB_TOKEN: ((github_token))
+
+    on_failure:
+      put: slack-notification
+      params:
+        channel: ((slack_channel))
+        username: ((slack_username))
+        icon_url: ((slack_logo))
+        text: >
+          :x: Unit tests failed!
+          Repository: <https://github.com/((github_user))/((github_repository_name))|((github_repository_name))>,
+          Build: <http://((concourse_host))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|$BUILD_NAME>)
+
+
+  - name: 'Build-Push'
+    build_logs_to_retain: 100
+    plan:
+      - get: source-code
+        resource: gh-release
+        trigger: True
+        version: every
+        passed:
+          - 'Lint'
+          - 'Test'
+
+      - task: Set tag
+        file: source-code/ci/tasks/set-tag.yml
+        params:
+          GITHUB_TOKEN: ((github_token))
+          VAULT_PASSWORD: ((vault_password))
+
+      - put: artifact-image
+        params:
+          build: source-code
+          tag: tag-code/image-tag
+          build_args_file: tag-code/build-args.json
+
+    on_failure:
+      put: slack-notification
+      params:
+        channel: ((slack_channel))
+        username: ((slack_username))
+        icon_url: ((slack_logo))
+        text: >
+          :x: Build failed!
+          Repository: <https://github.com/((github_user))/((github_repository_name))|((github_repository_name))>,
+          Build: <http://((concourse_host))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|$BUILD_NAME>)
+    on_success:
+      put: slack-notification
+      params:
+        channel: ((slack_channel))
+        username: ((slack_username))
+        icon_url: ((slack_logo))
+        text_file: tag-code/image-tag
+        text: >
+          :white_check_mark: Build Successful!
+          (Repository: <https://github.com/((github_user))/((github_repository_name))|((github_repository_name))>,
+          Version: $TEXT_FILE_CONTENT,
+          Build: <http://((concourse_host))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|$BUILD_NAME>)
