@@ -1,9 +1,11 @@
 # BanditsFramework
 ===================================
 
-This project aims to optimize the discount on the second box, for customers obtained by a freebie channel.
-
-It outlines the latest models, algorithms, data sources, and configuration required to run the project.
+This project aims to implement action on customers optimization based on context customer data.
+The framework implement general purpose functionalities to optimise a specific KPI using bandits alghoritms.
+Standard alg are implemented and can be tested using the simulation tool. 
+A new tree-based learner alghoritm is proposed (see Documentation) capable to auto generate optimised 
+segmentation using customers data.
 
 ## DEVELOPMENT
 
