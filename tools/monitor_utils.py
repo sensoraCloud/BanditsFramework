@@ -2,10 +2,10 @@ import functools
 import re
 from datetime import datetime
 
-import hfds
+import plds
 import numpy as np
 import pandas as pd
-from hfds.config import INFLUXDB_HOST, INFLUXDB_DATABASE
+from plds.config import INFLUXDB_HOST, INFLUXDB_DATABASE
 
 from voucher_opt.constants import GIVER_ID
 
@@ -49,17 +49,17 @@ def round_cols(model_out_col, external_db_col, df):
     return df
 
 
-def normalize_str_col(model_out_col, raf_col, df):
+def normalize_str_col(model_out_col, rok_col, df):
     df.loc[:, model_out_col] = df[model_out_col].astype(str).str.strip()
-    df.loc[:, raf_col] = df[raf_col].astype(str).str.strip()
+    df.loc[:, rok_col] = df[rok_col].astype(str).str.strip()
     return df
 
 
 def export_to_influx(external_db_name, errors, execution_date):
     print(f'Exporting errors to InfluxDB, {INFLUXDB_HOST}:{INFLUXDB_DATABASE}')
-    grafana_points = []
+    grokana_points = []
     for model_id, model_errors in errors.items():
-        grafana_points.append({
+        grokana_points.append({
             'measurement': f'happy_{external_db_name}_errors',
             'tags': {
                 'country': model_id[17:19]
@@ -69,8 +69,8 @@ def export_to_influx(external_db_name, errors, execution_date):
             },
             'time': datetime.strptime(execution_date, '%Y-%m-%d').isoformat()
         })
-    hfds.grafana.send_to_influxdb(grafana_points)
-    print(f'{len(grafana_points)} points exported.')
+    plds.grokana.send_to_influxdb(grokana_points)
+    print(f'{len(grokana_points)} points exported.')
 
 
 def plural_suffix(values):

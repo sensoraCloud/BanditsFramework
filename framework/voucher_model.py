@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import hfds
+import plds
 import numpy as np
 import pandas as pd
 
@@ -97,8 +97,8 @@ def _log_event_stats(unprepared_data, influx_exporter):
         lambda x: datetime.strptime(str(x), '%Y%m%d')).value_counts()
     influx_exporter.send_event_stats(events_per_date)
     events_per_week = events_per_date.reset_index(name='count')
-    events_per_week.loc[:, 'index'] = events_per_week['index'].apply(hfds.datetime.datetime_to_hf_week)
-    log.debug('Events per HelloFresh week:')
+    events_per_week.loc[:, 'index'] = events_per_week['index'].apply(plds.datetime.datetime_to_pl_week)
+    log.debug('Events per pl week:')
     log.debug(events_per_week.groupby('index').sum().sort_index().to_string())
 
 

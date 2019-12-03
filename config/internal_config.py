@@ -11,23 +11,23 @@ ENVIRONMENT = Environment.get_env(os.getenv('ENVIRONMENT', default=Environment.D
 
 ENVIRONMENT_CONFIG = {
     Environment.DEVELOPMENT: {
-        S3_CORE_DATA_BUCKET: 'bandit-data-hellofresh-staging',
+        S3_CORE_DATA_BUCKET: 'bandit-data-pl-staging',
         S3_MODELS_BUCKET: 'models-happy-hour-staging',
-        S3_CONFIG_BUCKET: 'bandit-config-hellofresh-staging',
+        S3_CONFIG_BUCKET: 'bandit-config-pl-staging',
         ATHENA_MODELS_DB: 'happyhourmodelsstaging',
         ATHENA_MODELS_TABLE: 'model_output'
     },
     Environment.STAGING: {
-        S3_CORE_DATA_BUCKET: 'bandit-data-hellofresh-staging',
+        S3_CORE_DATA_BUCKET: 'bandit-data-pl-staging',
         S3_MODELS_BUCKET: 'models-happy-hour-staging',
-        S3_CONFIG_BUCKET: 'bandit-config-hellofresh-staging',
+        S3_CONFIG_BUCKET: 'bandit-config-pl-staging',
         ATHENA_MODELS_DB: 'happyhourmodelsstaging',
         ATHENA_MODELS_TABLE: 'model_output'
     },
     Environment.PRODUCTION: {
-        S3_CORE_DATA_BUCKET: 'bandit-data-hellofresh',
+        S3_CORE_DATA_BUCKET: 'bandit-data-pl',
         S3_MODELS_BUCKET: 'models-happy-hour',
-        S3_CONFIG_BUCKET: 'bandit-config-hellofresh',
+        S3_CONFIG_BUCKET: 'bandit-config-pl',
         ATHENA_MODELS_DB: 'happyhourmodels',
         ATHENA_MODELS_TABLE: 'model_output'
     }

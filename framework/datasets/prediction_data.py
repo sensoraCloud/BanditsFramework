@@ -1,4 +1,4 @@
-import hfds
+import plds
 
 from config.internal_config import AWS_PARAMETERS
 from voucher_opt.constants import COUNTRY_PARTITION_KEY, RUN_ID_PARTITION_KEY, \
@@ -21,7 +21,7 @@ def get_raw_prediction_data(country, ref_date, features):
                         partitions(COUNTRY_PARTITION_KEY, MODEL_ID_PARTITION_KEY))
 
     log.info('Fetching data for customers which will be assigned actions...')
-    unprepared_prediction_df = hfds.db.run_dwh_query(complete_prediction_data_query)
+    unprepared_prediction_df = plds.db.run_dwh_query(complete_prediction_data_query)
     unprepared_prediction_df = unprepared_prediction_df.drop_duplicates(subset=[GIVER_ID])
 
     return unprepared_prediction_df[prediction_data_columns(features)]

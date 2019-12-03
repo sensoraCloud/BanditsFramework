@@ -1,4 +1,4 @@
-REPO = hellofreshds/voucher_opt
+REPO = plds/voucher_opt
 
 .PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3 test
 
@@ -57,7 +57,7 @@ ifeq ($(tag),)
 	$(eval target_dir := ".")
 else
 	rm -rf tmp
-	git clone -b $(tag) https://$(GITHUB_TOKEN)@github.com/hellofresh/data-science-voucher-opt.git -q tmp
+	git clone -b $(tag) https://$(GITHUB_TOKEN)@github.com/pl/data-science-voucher-opt.git -q tmp
 	$(eval target_dir := "./tmp")
 endif
 	docker build $(target_dir) \

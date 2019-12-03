@@ -3,14 +3,14 @@
 project_name: data-science-voucher-opt
 
 # Ownership information
-hellofresh_tribe: platform
-hellofresh_squad: data-science-platform
+pl_tribe: platform
+pl_squad: data-science-platform
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Concourse
 #-----------------------------------------------------------------------------------------------------------------------
 
-concourse_host: ci.hellofresh.io
+concourse_host: ci.pl.io
 concourse_webtokens: true
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ concourse_webtokens: true
 #-----------------------------------------------------------------------------------------------------------------------
 
 # GitHub User/Company name
-github_user: hellofresh
+github_user: pl
 
 # GitHub repository Name
 github_repository_name: data-science-voucher-opt
@@ -28,7 +28,7 @@ github_repository_name: data-science-voucher-opt
 #-----------------------------------------------------------------------------------------------------------------------
 
 # dockerhub repository
-dockerhub_account: hellofreshds
+dockerhub_account: plds
 dockerhub_repository: voucher_opt
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -37,14 +37,14 @@ dockerhub_repository: voucher_opt
 
 slack_username: data-science-voucher-opt
 slack_channel: "#ds-automation"
-slack_logo: https://hellofresh.github.io/scm-concourse-resources/logo.png
+slack_logo: https://pl.github.io/scm-concourse-resources/logo.png
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Docker Host
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Docker daemon socket(s) to connect to
-docker_host: concourse-docker-scm-test000.tools.hellofresh.io
+docker_host: concourse-docker-scm-test000.tools.pl.io
 docker_port: 2376
 
 # A set of variables to export for each integration test

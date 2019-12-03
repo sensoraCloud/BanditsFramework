@@ -3,10 +3,10 @@ import s3fs
 from dotenv import load_dotenv, find_dotenv
 
 from config.internal_config import ENVIRONMENT
-from tools.monitor_dwh import validate_models_in_dwh, fetch_event_data, send_stats_to_grafana
+from tools.monitor_dwh import validate_models_in_dwh, fetch_event_data, send_stats_to_grokana
 from tools.monitor_utils import export_to_influx, plural_suffix
 
-RAF_DB_CONN_TRIES = 3
+rok_DB_CONN_TRIES = 3
 
 load_dotenv(find_dotenv())
 
@@ -23,7 +23,7 @@ def main(execution_date):
     print(f'Fetching DWH events...')
     event_df = fetch_event_data(execution_date)
 
-    send_stats_to_grafana(event_df)
+    send_stats_to_grokana(event_df)
 
     validate_models_in_dwh(event_df, errors, s3)
 

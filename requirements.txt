@@ -17,4 +17,4 @@ scikit-learn==0.19.2
 toml==0.10.0
 yattag==1.10.1
 
-git+https://${GITHUB_TOKEN}@github.com/hellofresh/data-science-util-python@1.2.8#egg=hfds
+git+https://${GITHUB_TOKEN}@github.com/pl/data-science-util-python@1.2.8#egg=plds

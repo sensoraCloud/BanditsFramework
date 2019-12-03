@@ -38,7 +38,7 @@ def test_build_tree_no_confident_features():
         [1, 1, 0, 0.5],
         [2, 0, 0, 0.5],
         [3, 1, 0, 0.5],
-    ], columns=['action_code', 'has_sent_freebie', 'is_linux_user', 'norm_feedback'])
+    ], columns=['action_code', 'has_sent_gir', 'is_linux_user', 'norm_feedback'])
     builder = TreeSegmentationBuilder(universe_df, TreeSegmentParameters([1, 2, 3], 3, 10, 6, 0.1, np.mean))
     tree = builder.build_tree()
     assert_complete(tree)
@@ -55,7 +55,7 @@ def test_build_tree_1_confident_feature():
         [1, 1, 0, 0.5],
         [2, 0, 0, 0.5],
         [3, 1, 0, 0.5],
-    ], columns=['action_code', 'has_sent_freebie', 'is_linux_user', 'norm_feedback'])
+    ], columns=['action_code', 'has_sent_gir', 'is_linux_user', 'norm_feedback'])
     builder = TreeSegmentationBuilder(universe_df, TreeSegmentParameters([1, 2, 3], 1, 10, 6, 0.1, np.mean))
     tree = builder.build_tree()
     assert_complete(tree)
@@ -73,7 +73,7 @@ def test_build_tree_2_confident_features():
         [2, 0, 1, 0.01],
         [2, 1, 0, 0.01],
         [2, 1, 1, 0.01],
-    ], columns=['action_code', 'has_sent_freebie', 'is_linux_user', 'norm_feedback'])
+    ], columns=['action_code', 'has_sent_gir', 'is_linux_user', 'norm_feedback'])
     builder = TreeSegmentationBuilder(universe_df, TreeSegmentParameters([1, 2], 1, 10, 6, 0.01, np.mean))
     tree = builder.build_tree()
     assert_complete(tree)

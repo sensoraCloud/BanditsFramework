@@ -77,7 +77,7 @@ ACTION_REWARD = 'action_reward'
 ACTION_SAMPLES = 'action_samples'
 ACTION_IDX = 'action_idx'
 MATCHING_DATE = 'matching_date'
-MATCHING_HF_WEEK = 'matching_hf_week'
+MATCHING_pl_WEEK = 'matching_pl_week'
 HAS_EXPERIAN = 'has_experian'
 
 # Partition keys
@@ -92,7 +92,7 @@ MODEL_OUTPUT_FILE_ID = 'model_output'
 
 # Column lists
 NON_FEATURE_COLUMNS = [COUNTRY, RUN_ID, ELABORATION_DATE, ASSIGNED_DATE, GIVER_ID, RECEIVER_ID, MODEL_ID, ACTION_CODE,
-                       LOGPROB, FEEDBACK, SEGMENT, MATCHING_HF_WEEK, MATCHING_DATE]
+                       LOGPROB, FEEDBACK, SEGMENT, MATCHING_pl_WEEK, MATCHING_DATE]
 
 PREDICTION_COLUMNS = [GIVER_ID, SEGMENT, ACTION_CODE, LOGPROB, CONTROL, EXPLORATION]
 

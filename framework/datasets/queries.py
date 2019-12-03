@@ -1,4 +1,4 @@
-import hfds
+import plds
 
 from voucher_opt.config.project_parameters import project_parameters
 from voucher_opt.features.feature_definitions import generate_features_sub_queries
@@ -8,7 +8,7 @@ from voucher_opt.features.feature_definitions import generate_features_sub_queri
 # TODO: Docstrings and SQL comments
 def compile_dataset_query(model_version, country, prediction_date, feedback_weeks, event_table_identifier, features):
     event_query = read_query(project_parameters.event_query, country=country, model_version=model_version,
-                             current_hf_running_week=_get_current_running_hf_week(prediction_date),
+                             current_pl_running_week=_get_current_running_pl_week(prediction_date),
                              feedback_weeks=feedback_weeks, table_identifier=event_table_identifier)
     feedback_query = read_query(project_parameters.feedback_query, feedback_weeks=feedback_weeks)
     features_query = generate_features_sub_queries(features)
@@ -28,18 +28,18 @@ def compile_prediction_data_query(country, elaboration_date_str, features):
     return complete_prediction_data_query
 
 
-def _get_current_running_hf_week(prediction_date):
-    current_hf_week = hfds.dt.datetime_to_hf_week(prediction_date)
+def _get_current_running_pl_week(prediction_date):
+    current_pl_week = plds.dt.datetime_to_pl_week(prediction_date)
     running_week_query = f'''
         SELECT DISTINCT
-            hellofresh_running_week
+            pl_running_week
         FROM
             dimensions.date_dimension
         WHERE
-            hellofresh_week = "{current_hf_week}"
+            pl_week = "{current_pl_week}"
         '''
-    current_hf_running_week = hfds.db.run_dwh_query(running_week_query).values[0][0]
-    return current_hf_running_week
+    current_pl_running_week = plds.db.run_dwh_query(running_week_query).values[0][0]
+    return current_pl_running_week
 
 
 def read_query(query_path, **query_params):

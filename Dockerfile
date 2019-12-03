@@ -1,4 +1,4 @@
-FROM hellofreshds/data-science-utils:1.3.0
+FROM plds/data-science-utils:1.3.0
 
 ARG GITHUB_TOKEN
 ARG VAULT_PASSWORD

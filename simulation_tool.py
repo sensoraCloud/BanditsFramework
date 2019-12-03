@@ -8,12 +8,12 @@ from datetime import datetime
 import click
 import numpy as np
 import pandas as pd
-from hfds.datetime import hf_week_add, hf_week_sub
+from plds.datetime import pl_week_add, pl_week_sub
 from sklearn.model_selection import ParameterGrid
 
 from voucher_opt.config import project_parameters
 from voucher_opt.config.model_parameters import ModelParameters
-from voucher_opt.constants import GIVER_ID, RECEIVER_ID, ACTION_CODE, FEEDBACK, LOGPROB, MATCHING_HF_WEEK, \
+from voucher_opt.constants import GIVER_ID, RECEIVER_ID, ACTION_CODE, FEEDBACK, LOGPROB, MATCHING_pl_WEEK, \
     SEGMENT, NON_FEATURE_COLUMNS
 from voucher_opt.datasets.training_data import fetch_simulation_data, prepare_training_data, training_data_columns
 from voucher_opt.features.feature_definitions import FeatureSet, feature_names
@@ -57,7 +57,7 @@ PROB_ADJUSTED_FEEDBACK = 'prob_adjusted_feedback'
 AGENT_NAME = 'agent_name'
 
 # User configured parameters
-EARLIEST_HF_WEEK = '2018-W40'
+EARLIEST_pl_WEEK = '2018-W40'
 SIMULATION_NAME = 'seg_basic_params'
 
 # Change this according to which actions exist in the dataset
@@ -149,52 +149,52 @@ def main(ctx, country, num_feedback_weeks, num_seed_weeks):
 
     all_features, feature_sets = create_feature_sets(country)
 
-    dataset = load_dataset(country, prediction_date, num_feedback_weeks, EARLIEST_HF_WEEK, all_features)
+    dataset = load_dataset(country, prediction_date, num_feedback_weeks, EARLIEST_pl_WEEK, all_features)
     sim_logger.info(
         f'Number of agents to evaulate = {len(agents(all_features, feature_sets))}')
 
     agent_to_train_batch_idxs = defaultdict(lambda: pd.Index([]))
     agent_scores = pd.DataFrame([])
 
-    hf_week_series = []
-    hf_week = dataset[MATCHING_HF_WEEK].min()
-    seed_weeks = [hf_week_add(hf_week, i) for i in range(num_seed_weeks)]
+    pl_week_series = []
+    pl_week = dataset[MATCHING_pl_WEEK].min()
+    seed_weeks = [pl_week_add(pl_week, i) for i in range(num_seed_weeks)]
     all_matches = []
     all_actuals = []
-    while hf_week in dataset[MATCHING_HF_WEEK].unique():
-        if hf_week not in seed_weeks:
-            hf_week_series.append(hf_week)
+    while pl_week in dataset[MATCHING_pl_WEEK].unique():
+        if pl_week not in seed_weeks:
+            pl_week_series.append(pl_week)
         agents_to_evaluate: [BanditAgent] = agents(all_features, feature_sets)
-        sim_logger.info(f'Week {hf_week}')
+        sim_logger.info(f'Week {pl_week}')
 
-        train_agents(agents_to_evaluate, dataset, agent_to_train_batch_idxs, hf_week, num_feedback_weeks)
+        train_agents(agents_to_evaluate, dataset, agent_to_train_batch_idxs, pl_week, num_feedback_weeks)
 
-        this_weeks_batch = dataset[dataset[MATCHING_HF_WEEK] == hf_week]
+        this_weeks_batch = dataset[dataset[MATCHING_pl_WEEK] == pl_week]
         if not (this_weeks_batch[ACTION_CODE] == 0.0).all():
-            actual_df = this_weeks_batch[[GIVER_ID, RECEIVER_ID, FEEDBACK, ACTION_CODE, LOGPROB, MATCHING_HF_WEEK]] \
+            actual_df = this_weeks_batch[[GIVER_ID, RECEIVER_ID, FEEDBACK, ACTION_CODE, LOGPROB, MATCHING_pl_WEEK]] \
                 .rename(index=str, columns={ACTION_CODE: ACTUAL}).copy()
             for agent in agents_to_evaluate:
-                sim_logger.info(f'{hf_week}: Scoring agent {agent.name} with configuration {agent.configuration}')
+                sim_logger.info(f'{pl_week}: Scoring agent {agent.name} with configuration {agent.configuration}')
                 prediction_df = this_weeks_batch[[GIVER_ID] + feature_names(agent.features)].copy()
-                matches = predict_and_match(agent, hf_week, prediction_df, actual_df)
+                matches = predict_and_match(agent, pl_week, prediction_df, actual_df)
                 all_matches.append(matches)
-                all_actuals.append(actual_df[[MATCHING_HF_WEEK, ACTUAL, FEEDBACK, LOGPROB]])
-                if hf_week in seed_weeks:
+                all_actuals.append(actual_df[[MATCHING_pl_WEEK, ACTUAL, FEEDBACK, LOGPROB]])
+                if pl_week in seed_weeks:
                     train_batch = this_weeks_batch
                 else:
                     train_batch = this_weeks_batch.reset_index().merge(matches[[GIVER_ID, RECEIVER_ID]],
                                                                        how='inner').set_index('index')
-                    agent_scores = score_agent(agent, hf_week, matches, len(this_weeks_batch), agent_scores)
+                    agent_scores = score_agent(agent, pl_week, matches, len(this_weeks_batch), agent_scores)
                 train_batch_idxs = agent_to_train_batch_idxs[agent]
                 agent_to_train_batch_idxs[agent] = train_batch_idxs.union(train_batch.index)
         if not agent_scores.empty:
-            weekly_scores = agent_scores[agent_scores[MATCHING_HF_WEEK] == hf_week]
-            write_df(f'{table_dir}/weekly', hf_week, run_id, weekly_scores)
-        hf_week = hf_week_add(hf_week, 1)
+            weekly_scores = agent_scores[agent_scores[MATCHING_pl_WEEK] == pl_week]
+            write_df(f'{table_dir}/weekly', pl_week, run_id, weekly_scores)
+        pl_week = pl_week_add(pl_week, 1)
 
     parameter_cols = list({p for g in PARAMETER_GRID for p in g}.union(EPS_GREEDY_PARAMS.keys()))
     write_df(table_dir, 'matches', run_id, pd.concat(all_matches, sort=False)[
-        ['actual', 'agent_name', 'feedback', 'logprob', 'matching_hf_week', 'prediction', 'segment'] + parameter_cols])
+        ['actual', 'agent_name', 'feedback', 'logprob', 'matching_pl_week', 'prediction', 'segment'] + parameter_cols])
     write_df(table_dir, 'actuals', run_id, pd.concat(all_actuals, sort=False))
     aggregate_final_scores(agent_scores, parameter_cols, run_id, table_dir)
 
@@ -202,7 +202,7 @@ def main(ctx, country, num_feedback_weeks, num_seed_weeks):
 def aggregate_final_scores(agent_scores, parameter_cols, run_id, table_dir):
     agent_scores = compute_cumulative_scores(agent_scores)
     agent_scores = agent_scores[
-        [MATCHING_HF_WEEK, AGENT_NAME, 'dm_sum', 'dm_batch', 'dm_cum', 'ips_sum', 'ips_batch', 'ips_cum', 'hits',
+        [MATCHING_pl_WEEK, AGENT_NAME, 'dm_sum', 'dm_batch', 'dm_cum', 'ips_sum', 'ips_batch', 'ips_cum', 'hits',
          'num_samples'] + parameter_cols]
     write_df(table_dir, 'scores', run_id, agent_scores)
 
@@ -213,24 +213,24 @@ def initialize(ctx, run_id, country):
     set_partition_parameters(country, run_id)
 
 
-def load_dataset(country, prediction_date, feedback_weeks, earliest_hf_week, features):
+def load_dataset(country, prediction_date, feedback_weeks, earliest_pl_week, features):
     dataset = fetch_simulation_data(country, prediction_date, feedback_weeks,
                                     project_parameters.project_parameters.model_version, features)
     dataset, metadata = prepare_training_data(features, prediction_date, dataset)
     dataset[RECEIVER_ID] = metadata[RECEIVER_ID]
     dataset[LOGPROB] = metadata[LOGPROB]
-    dataset[MATCHING_HF_WEEK] = metadata[MATCHING_HF_WEEK]
-    dataset = dataset[dataset[MATCHING_HF_WEEK] >= earliest_hf_week]
+    dataset[MATCHING_pl_WEEK] = metadata[MATCHING_pl_WEEK]
+    dataset = dataset[dataset[MATCHING_pl_WEEK] >= earliest_pl_week]
     if dataset.empty:
         sim_logger.error('Could not load any data. Closing.')
         sys.exit(1)
     sim_logger.info(f'Dataset shape = {dataset.shape}')
-    dataset = dataset.sort_values(by=MATCHING_HF_WEEK)
+    dataset = dataset.sort_values(by=MATCHING_pl_WEEK)
     return dataset
 
 
-def train_agents(agents_to_evaluate: [BanditAgent], dataset, agent_to_train_batch_idxs, hf_week, feedback_weeks):
-    last_train_week = hf_week_sub(hf_week, feedback_weeks)
+def train_agents(agents_to_evaluate: [BanditAgent], dataset, agent_to_train_batch_idxs, pl_week, feedback_weeks):
+    last_train_week = pl_week_sub(pl_week, feedback_weeks)
     for agent in agents_to_evaluate:
         try:
             idxs = agent_to_train_batch_idxs[agent]
@@ -238,55 +238,55 @@ def train_agents(agents_to_evaluate: [BanditAgent], dataset, agent_to_train_batc
                 train_batch = dataset.loc[idxs, :]
             else:
                 train_batch = pd.DataFrame()
-            sim_logger.info(f'{hf_week}: Training agent {agent.name} with configuration {agent.configuration} '
+            sim_logger.info(f'{pl_week}: Training agent {agent.name} with configuration {agent.configuration} '
                             f'Training data shape = {train_batch.shape}')
             if train_batch.empty:
                 train_batch = pd.DataFrame(
-                    columns=training_data_columns(agent.features) + [MATCHING_HF_WEEK])
-            train_batch = train_batch[train_batch[MATCHING_HF_WEEK] <= last_train_week]
+                    columns=training_data_columns(agent.features) + [MATCHING_pl_WEEK])
+            train_batch = train_batch[train_batch[MATCHING_pl_WEEK] <= last_train_week]
             train_batch = train_batch[training_data_columns(agent.features)]
             agent.train(train_batch)
         except Exception:
             error = traceback.format_exc()
             sim_logger.error(error)
             sim_logger.error(
-                f'Agent {agent.name} crashed while training during week {hf_week} with the following configuration:')
+                f'Agent {agent.name} crashed while training during week {pl_week} with the following configuration:')
             sim_logger.error(str(agent.configuration))
             sys.exit(1)
 
 
-def predict_and_match(agent, hf_week, prediction_df, actual_df):
+def predict_and_match(agent, pl_week, prediction_df, actual_df):
     predictions = agent.predict(prediction_df)[[GIVER_ID, SEGMENT, ACTION_CODE]].rename(
         index=str, columns={ACTION_CODE: PREDICTION})
     rewards = actual_df.merge(predictions, on=GIVER_ID).drop_duplicates([GIVER_ID, RECEIVER_ID])
     matches = rewards[rewards.prediction == rewards.actual].copy()
     if not matches.empty:
-        matches.loc[:, MATCHING_HF_WEEK] = hf_week
+        matches.loc[:, MATCHING_pl_WEEK] = pl_week
         matches.loc[:, AGENT_NAME] = agent.name
         for key, value in agent.configuration.items():
             matches.loc[:, key] = value
     return matches
 
 
-def score_agent(agent: BanditAgent, hf_week, matches, num_samples, agent_scores):
+def score_agent(agent: BanditAgent, pl_week, matches, num_samples, agent_scores):
     matches.loc[:, PROB_ADJUSTED_FEEDBACK] = (matches[FEEDBACK] / matches[LOGPROB])
     hits = 1 + len(matches)
     dm_sum = matches[FEEDBACK].sum()
     ips_sum = matches[PROB_ADJUSTED_FEEDBACK].sum()
     weekly_dm = dm_sum / hits
     weekly_ips = ips_sum / num_samples
-    this_week_entry = [hf_week, agent.name, weekly_dm, dm_sum, hits, weekly_ips, ips_sum,
+    this_week_entry = [pl_week, agent.name, weekly_dm, dm_sum, hits, weekly_ips, ips_sum,
                        num_samples] + list(agent.configuration.values())
     weekly_scores = pd.DataFrame([this_week_entry],
-                                 columns=[MATCHING_HF_WEEK, AGENT_NAME, 'dm_batch', 'dm_sum', 'hits', 'ips_batch',
+                                 columns=[MATCHING_pl_WEEK, AGENT_NAME, 'dm_batch', 'dm_sum', 'hits', 'ips_batch',
                                           'ips_sum', 'num_samples'] + list(agent.configuration.keys()))
     agent_scores = pd.concat([agent_scores, weekly_scores], sort=False)
     return agent_scores
 
 
-def weekly_scores_df(metric, agent_to_scores, hf_week_series):
-    weekly_scores = pd.DataFrame(columns=[MATCHING_HF_WEEK] + list(agent_to_scores.keys()))
-    weekly_scores[MATCHING_HF_WEEK] = hf_week_series
+def weekly_scores_df(metric, agent_to_scores, pl_week_series):
+    weekly_scores = pd.DataFrame(columns=[MATCHING_pl_WEEK] + list(agent_to_scores.keys()))
+    weekly_scores[MATCHING_pl_WEEK] = pl_week_series
     for agent_name, agent_df in agent_to_scores.items():
         weekly_scores.loc[:, agent_name] = agent_df[f'{metric}_weekly'].values
     return weekly_scores

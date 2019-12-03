@@ -1,10 +1,10 @@
-import hfds
-from hfds.config import INFLUXDB_DATABASE, INFLUXDB_HOST
+import plds
+from plds.config import INFLUXDB_DATABASE, INFLUXDB_HOST
 
 from voucher_opt.logger import log
 
 
-# The stats in InfluxDB are consumed by dashboards in Grafana
+# The stats in InfluxDB are consumed by dashboards in Grokana
 
 class InfluxExporter:
     def __init__(self, country, elaboration_date, model_id):
@@ -28,7 +28,7 @@ class InfluxExporter:
                 },
                 'time': self.elaboration_date.isoformat()
             })
-        hfds.grafana.send_to_influxdb(points)
+        plds.grokana.send_to_influxdb(points)
 
     def send_event_stats(self, events_per_date):
         log.info(f'Exporting event statistics to InfluxDB, {INFLUXDB_HOST}:{INFLUXDB_DATABASE}')
@@ -45,7 +45,7 @@ class InfluxExporter:
                 },
                 'time': key.isoformat()
             })
-        hfds.grafana.send_to_influxdb(points)
+        plds.grokana.send_to_influxdb(points)
 
 
 def send_all_event_stats(events_per_country_date):
@@ -62,4 +62,4 @@ def send_all_event_stats(events_per_country_date):
             },
             'time': key[1].isoformat()
         })
-    hfds.grafana.send_to_influxdb(points)
+    plds.grokana.send_to_influxdb(points)

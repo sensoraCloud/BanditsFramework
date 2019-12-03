@@ -1,8 +1,8 @@
 from datetime import datetime
 
-import hfds
+import plds
 import pandas as pd
-from hfds.datetime import datetime_to_hf_week
+from plds.datetime import datetime_to_pl_week
 
 from config import internal_config
 from config.internal_config import AWS_PARAMETERS
@@ -10,14 +10,14 @@ from voucher_opt.config.project_parameters import project_parameters
 from voucher_opt.constants import RECEIVER_ID, GIVER_ID, MODEL_ID, ASSIGNED_DATE, ELABORATION_DATE, \
     RAW_TRAINING_DATA_CACHE_KEY, \
     RUN_ID_PARTITION_KEY, COUNTRY_PARTITION_KEY, MODEL_ID_PARTITION_KEY, COUNTRY, MATCHING_DATE, LOGPROB, \
-    MATCHING_HF_WEEK, ACTION_CODE, FEEDBACK
+    MATCHING_pl_WEEK, ACTION_CODE, FEEDBACK
 from voucher_opt.datasets.queries import compile_dataset_query
 from voucher_opt.file_handling.cache import cacheable, partitions
 from voucher_opt.file_handling.writers import writer
 from voucher_opt.logger import log
 
 TRAINING_META_DATA_COLUMNS = [COUNTRY, ASSIGNED_DATE, RECEIVER_ID, MODEL_ID, ELABORATION_DATE, MATCHING_DATE,
-                              MATCHING_HF_WEEK, LOGPROB]
+                              MATCHING_pl_WEEK, LOGPROB]
 
 
 def training_data_columns(features):
@@ -32,7 +32,7 @@ def fetch_training_data(country, prediction_date, feedback_weeks, features):
                         partitions(COUNTRY_PARTITION_KEY, MODEL_ID_PARTITION_KEY))
 
     log.info('Fetching training data...')
-    unprepared_training_df = hfds.db.run_dwh_query(dataset_query)
+    unprepared_training_df = plds.db.run_dwh_query(dataset_query)
 
     unprepared_training_df = unprepared_training_df.drop_duplicates(subset=[MODEL_ID, GIVER_ID, RECEIVER_ID])
 
@@ -52,7 +52,7 @@ def fetch_simulation_data(country, prediction_date, feedback_weeks, model_versio
         writer.write_string(dataset_query, 'dataset_query', AWS_PARAMETERS.s3_core_data_bucket,
                             partitions(COUNTRY_PARTITION_KEY, MODEL_ID_PARTITION_KEY))
 
-        unprepared_training_df = hfds.db.run_dwh_query(dataset_query)
+        unprepared_training_df = plds.db.run_dwh_query(dataset_query)
         unprepared_training_df = unprepared_training_df.drop_duplicates(subset=[MODEL_ID, GIVER_ID, RECEIVER_ID])
         datasets.append(unprepared_training_df)
 
@@ -68,9 +68,9 @@ def prepare_training_data(features, prediction_date, unprepared_training_df):
     if unprepared_training_df.empty:
         return pd.DataFrame(columns=columns), pd.DataFrame()
     unprepared_training_df.loc[:, ELABORATION_DATE] = datetime.strftime(prediction_date, '%Y-%m-%d')
-    hf_week_series = unprepared_training_df[MATCHING_DATE].apply(lambda x: datetime.strptime(str(x), '%Y%m%d')).apply(
-        datetime_to_hf_week)
-    unprepared_training_df.loc[:, MATCHING_HF_WEEK] = hf_week_series
+    pl_week_series = unprepared_training_df[MATCHING_DATE].apply(lambda x: datetime.strptime(str(x), '%Y%m%d')).apply(
+        datetime_to_pl_week)
+    unprepared_training_df.loc[:, MATCHING_pl_WEEK] = pl_week_series
     training_meta_data = unprepared_training_df[[GIVER_ID] + TRAINING_META_DATA_COLUMNS].copy()
     training_meta_data.loc[:, ASSIGNED_DATE] = training_meta_data.assigned_date.apply(
         lambda x: datetime.strftime(datetime.strptime(str(x), '%Y%m%d'), '%Y-%m-%d'))

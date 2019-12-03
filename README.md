@@ -1,7 +1,7 @@
 # BanditsFramework
 ===================================
 
-This project aims to optimize the discount on the second box, for customers obtained by a freebie channel.
+This project aims to optimize the discount on the second box, for customers obtained by a gir channel.
 
 It outlines the latest models, algorithms, data sources, and configuration required to run the project.
 

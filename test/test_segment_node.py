@@ -20,9 +20,9 @@ def actions():
 
 def test_feature_value_aggregations_confident(actions):
     group = pd.DataFrame([
-        ['has_sent_freebie', 0, 1, 300, 0.05],
-        ['has_sent_freebie', 0, 2, 100, 0.02],
-        ['has_sent_freebie', 0, 3, 100, 0.10],
+        ['has_sent_gir', 0, 1, 300, 0.05],
+        ['has_sent_gir', 0, 2, 100, 0.02],
+        ['has_sent_gir', 0, 3, 100, 0.10],
     ], columns=['feat', 'feat_value', 'action_code', 'feat_val_action_count', 'feat_val_action_reward_agg'])
     agg = feature_value_aggregations(group, len(actions), 100)
     assert agg['sample_confident']
@@ -32,9 +32,9 @@ def test_feature_value_aggregations_confident(actions):
 
 def test_feature_value_aggregations_not_confident(actions):
     group = pd.DataFrame([
-        ['has_sent_freebie', 0, 1, 300, 0.05],
-        ['has_sent_freebie', 0, 2, 90, 0.02],
-        ['has_sent_freebie', 0, 3, 100, 0.10],
+        ['has_sent_gir', 0, 1, 300, 0.05],
+        ['has_sent_gir', 0, 2, 90, 0.02],
+        ['has_sent_gir', 0, 3, 100, 0.10],
     ], columns=['feat', 'feat_value', 'action_code', 'feat_val_action_count', 'feat_val_action_reward_agg'])
     agg = feature_value_aggregations(group, len(actions), 100)
     assert not agg['sample_confident']
@@ -44,8 +44,8 @@ def test_feature_value_aggregations_not_confident(actions):
 
 def test_feature_aggregations_confident():
     group = pd.DataFrame([
-        ['has_sent_freebie', 0.1, True],
-        ['has_sent_freebie', 0.2, True],
+        ['has_sent_gir', 0.1, True],
+        ['has_sent_gir', 0.2, True],
     ], columns=['feat', 'feat_val_expected', 'sample_confident'])
     agg = feature_aggregations(group)
     assert agg['feat_expected_feedback'] == approx(0.3, 0.001)
@@ -54,8 +54,8 @@ def test_feature_aggregations_confident():
 
 def test_feature_aggregations_not_confident():
     group = pd.DataFrame([
-        ['has_sent_freebie', 0.4, True],
-        ['has_sent_freebie', 0.2, False],
+        ['has_sent_gir', 0.4, True],
+        ['has_sent_gir', 0.2, False],
     ], columns=['feat', 'feat_val_expected', 'sample_confident'])
     agg = feature_aggregations(group)
     assert agg['feat_expected_feedback'] == approx(0.6, 0.001)
@@ -70,10 +70,10 @@ def test_select_split_feature(actions):
         [1, 1, 0, 0.5],
         [2, 0, 0, 0.5],
         [3, 1, 0, 0.5],
-    ], columns=['action_code', 'has_sent_freebie', 'is_linux_user', 'norm_feedback'])
+    ], columns=['action_code', 'has_sent_gir', 'is_linux_user', 'norm_feedback'])
     node = SegmentNode(None, None, 0, [], segment_df, TreeSegmentParameters(actions, 1, 10, 6, 0.1, np.mean))
     selected_feature = node.select_split_feature(len(segment_df), len(segment_df.columns))
-    assert selected_feature == 'has_sent_freebie'
+    assert selected_feature == 'has_sent_gir'
 
 
 def test_split_segment():
@@ -84,17 +84,17 @@ def test_split_segment():
         [1, 1, 0, 0.5],
         [2, 0, 0, 0.5],
         [3, 1, 0, 0.5],
-    ], columns=['action_code', 'has_sent_freebie', 'is_linux_user', 'norm_feedback'])
+    ], columns=['action_code', 'has_sent_gir', 'is_linux_user', 'norm_feedback'])
     node = SegmentNode(None, None, 0, [], segment_df, TreeSegmentParameters(actions, 1, 10, 6, 0.1, np.mean))
-    left, right = node.split_segment('has_sent_freebie')
+    left, right = node.split_segment('has_sent_gir')
     assert len(left._df) == 3
-    assert left._feature == 'has_sent_freebie'
+    assert left._feature == 'has_sent_gir'
     assert left._feature_value == 0
     assert len(right._df) == 3
-    assert right._feature == 'has_sent_freebie'
+    assert right._feature == 'has_sent_gir'
     assert right._feature_value == 1
-    assert left.branch == [('has_sent_freebie', 0)]
-    assert right.branch == [('has_sent_freebie', 1)]
+    assert left.branch == [('has_sent_gir', 0)]
+    assert right.branch == [('has_sent_gir', 1)]
     assert left.depth == 2
     assert right.depth == 2
 
