@@ -1,9 +1,11 @@
 # BanditsFramework
-===================================
 
-This project aims to optimize the discount on the second box, for customers obtained by a gir channel.
 
-It outlines the latest models, algorithms, data sources, and configuration required to run the project.
+The framework implement general purpose functionalities to optimise a specific KPI using bandits alghoritms based on customers data.
+Standard algos are implemented and can be tested within the simulation tool. 
+A new tree-based learner alghoritm is proposed (see Documentation); capable to auto generate optimised 
+segmentations using customers data.
+
 
 ## DEVELOPMENT
 
